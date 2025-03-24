@@ -1,18 +1,30 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "module": "commonjs",
-    "strict": true,
+    "rootDir": ".",
+    "paths": {
+      "react-native-tdlib": ["./src/index"]
+    },
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
     "esModuleInterop": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "jsx": "react",
-    "lib": ["dom", "es5", "es6", "scripthost"],
-    "target": "es5",
-    "rootDir": "./src",
-    "outDir": "build",
-    "sourceMap": true,
-    "skipLibCheck": true
-  },
-  "exclude": ["node_modules"]
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitUseStrict": false,
+    "noStrictGenericChecks": false,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolveJsonModule": true,
+    "resolvePackageJsonImports": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext",
+    "verbatimModuleSyntax": true
+  }
 }

@@ -1,22 +1,12 @@
-const path = require('path');
-
+/**
+ * @type {import('@react-native-community/cli-types').UserDependencyConfig}
+ */
 module.exports = {
-    dependency: {
-        platforms: {
-            ios: {
-                podspecPath: 'react-native-tdlib.podspec',
-                sourceDir: path.join(__dirname, 'ios'),
-            },
-            android: {
-                sourceDir: path.join(__dirname, 'android'),
-                packageImportPath: 'import com.reactnativetdlib.tdlibclient.TdLibPackage;',
-                packageInstance: 'new TdLibPackage()',
-            },
-        },
+  dependency: {
+    platforms: {
+      android: {
+        cmakeListsPath: 'generated/jni/CMakeLists.txt',
+      },
     },
-    dependencies: {
-        'react-native-tdlib': {
-            root: __dirname,
-        },
-    },
+  },
 };
