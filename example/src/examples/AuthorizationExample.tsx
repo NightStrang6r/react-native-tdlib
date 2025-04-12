@@ -2,7 +2,7 @@
  * Example with authorization flow
  */
 
-import React, {useCallback, useEffect} from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   Button,
   Platform,
@@ -13,11 +13,13 @@ import {
   View,
 } from 'react-native';
 import TdLib from 'react-native-tdlib';
+import Config from 'react-native-config';
+import type { TdLibParameters } from '../../../src/NativeTdlib';
 
 const parameters = {
-  api_id: 12345678, // Your API ID
-  api_hash: '12345678', // Your API Hash
-};
+  api_id: Number(Config.APP_ID), // Your API ID
+  api_hash: Config.APP_HASH, // Your API Hash
+} as TdLibParameters;
 
 const AuthorizationExample = () => {
   const [phone, setPhone] = React.useState('');
@@ -25,12 +27,15 @@ const AuthorizationExample = () => {
   const [otp, setOtp] = React.useState('');
   const [countryCode, setCountryCode] = React.useState('');
   const [profile, setProfile] = React.useState<any>(null);
+  const [chatId, setChatId] = React.useState('');
+  const [message, setMessage] = React.useState('');
 
   useEffect(() => {
     // Initializes TDLib with the provided parameters and checks the authorization state
-    TdLib.startTdLib(parameters).then(r => {
+    console.log('Initializing TDLib...');
+    TdLib.startTdLib(parameters).then((r) => {
       console.log('StartTdLib:', r);
-      TdLib.getAuthorizationState().then(r => {
+      TdLib.getAuthorizationState().then((r) => {
         console.log('InitialAuthState:', r);
         if (JSON.parse(r)['@type'] === 'authorizationStateReady') {
           getProfile(); // Fetches the user's profile if authorization is ready
@@ -40,39 +45,57 @@ const AuthorizationExample = () => {
   }, []);
 
   // Sends a verification code to the provided phone number
-  const sendCode = useCallback(() => {
-    TdLib.login({countrycode: countryCode, phoneNumber: phone}).then(r =>
-      console.log('SendCode:', r),
-    );
+  const sendCode = useCallback(async () => {
+    try {
+      console.log('Sending code...');
+      const result = await TdLib.login({
+        countrycode: countryCode,
+        phoneNumber: phone,
+      });
+      console.log('SendCode:', result);
+    } catch (error) {
+      console.error('Ошибка login:', error);
+    }
   }, [countryCode, phone]);
 
   // Verifies the phone number using the entered OTP code
   const verifyPhoneNumber = useCallback(() => {
-    TdLib.verifyPhoneNumber(otp).then(r =>
-      console.log('VerifyPhoneNumber:', r),
+    TdLib.verifyPhoneNumber(otp).then((r) =>
+      console.log('VerifyPhoneNumber:', r)
     );
   }, [otp]);
 
   // Verifies the password if required for login
   const checkPassword = useCallback(() => {
-    TdLib.verifyPassword(password).then(r => console.log('CheckPassword:', r));
+    TdLib.verifyPassword(password).then((r) =>
+      console.log('CheckPassword:', r)
+    );
   }, [password]);
 
   // Fetches the profile of the logged-in user
-  const getProfile = useCallback(() => {
-    TdLib.getProfile().then(result => {
-      console.log('User Profile:', result);
-      const profile = Platform.select({
-        ios: result,
-        android: JSON.parse(result),
-      });
-      setProfile(profile);
+  const getProfile = useCallback(async () => {
+    console.log('Fetching profile...');
+    const result = await TdLib.getProfile();
+    console.log('User Profile:', result);
+    const profile = Platform.select({
+      ios: result,
+      android: JSON.parse(result),
     });
+    setProfile(profile);
   }, []);
 
   const checkAuthState = useCallback(() => {
-    TdLib.getAuthorizationState().then(r => console.log('AuthState:', r));
+    TdLib.getAuthorizationState().then((r) => console.log('AuthState:', r));
   }, []);
+
+  const sendMessage = useCallback(async () => {
+    try {
+      const result = await TdLib.sendMessage(chatId, message);
+      console.log('SendMessage:', result);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  }, [chatId, message]);
 
   return (
     <ScrollView style={styles.container}>
@@ -87,7 +110,7 @@ const AuthorizationExample = () => {
           style={[
             styles.input,
             {
-              marginBottom: 10,
+              marginBottom: 14,
               marginTop: 14,
             },
           ]}
@@ -97,7 +120,12 @@ const AuthorizationExample = () => {
           onChangeText={setPhone}
           placeholder={'1234567890'}
           placeholderTextColor={'gray'}
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              marginBottom: 14,
+            },
+          ]}
         />
         <Button title={'Send Code'} onPress={sendCode} />
         <View style={styles.divider} />
@@ -144,6 +172,33 @@ const AuthorizationExample = () => {
         )}
         <Button title={'Get Profile'} onPress={getProfile} />
         <Button title={'Get Auth State'} onPress={checkAuthState} />
+        <View style={styles.divider} />
+        <Text>Send Message</Text>
+        <TextInput
+          value={chatId}
+          onChangeText={setChatId}
+          placeholder={'Chat ID'}
+          placeholderTextColor={'gray'}
+          style={[
+            styles.input,
+            {
+              marginVertical: 14,
+            },
+          ]}
+        />
+        <TextInput
+          value={message}
+          onChangeText={setMessage}
+          placeholder={'Message'}
+          placeholderTextColor={'gray'}
+          style={[
+            styles.input,
+            {
+              marginBottom: 14,
+            },
+          ]}
+        />
+        <Button title={'Send Message'} onPress={sendMessage} />
       </View>
     </ScrollView>
   );
@@ -158,8 +213,8 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 8,
   },
-  title: {fontSize: 18, alignSelf: 'center', marginBottom: 10},
-  input: {padding: 6, borderRadius: 10, borderWidth: 1, height: 40},
+  title: { fontSize: 18, alignSelf: 'center', marginBottom: 10 },
+  input: { padding: 6, borderRadius: 10, borderWidth: 1, height: 40 },
   divider: {
     height: 1,
     width: '100%',

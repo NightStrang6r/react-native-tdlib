@@ -3,23 +3,25 @@
  * In progress
  */
 
-import React, {useCallback, useEffect} from 'react';
-import {Button, SafeAreaView, StyleSheet} from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import { Button, SafeAreaView, StyleSheet } from 'react-native';
 import TdLib from 'react-native-tdlib';
+import Config from 'react-native-config';
+import type { TdLibParameters } from '../../../src/NativeTdlib';
 
 const parameters = {
   database_directory: 'tdlib',
   use_message_database: true,
   use_secret_chats: true,
-  api_id: 123456, // Your API ID
-  api_hash: '123456', // Your API Hash
+  api_id: Number(Config.APP_ID),
+  api_hash: Config.APP_HASH,
   system_language_code: 'en',
   device_model: 'React Native',
   system_version: '1.0',
   application_version: '1.0',
   enable_storage_optimizer: true,
   use_file_database: true,
-};
+} as TdLibParameters;
 
 const BaseApiExample = () => {
   let client = null as any;
@@ -49,7 +51,7 @@ const BaseApiExample = () => {
     try {
       if (!client) {
         throw new Error(
-          'TDLib client not initialized. Call initializeTdLibClient first.',
+          'TDLib client not initialized. Call initializeTdLibClient first.'
         );
       }
 
@@ -106,7 +108,7 @@ const BaseApiExample = () => {
   const sendCode = useCallback(() => {
     const phoneRequest = {
       '@type': 'setAuthenticationPhoneNumber',
-      phone_number: '+12345678', // Your Telegram phone number
+      'phone_number': '+12345678', // Your Telegram phone number
     };
 
     TdLib.td_json_client_send(phoneRequest);
@@ -118,10 +120,10 @@ const BaseApiExample = () => {
   const setLocalizationTargetOption = async () => {
     const request = {
       '@type': 'setOption',
-      name: 'localization_target',
-      value: {
+      'name': 'localization_target',
+      'value': {
         '@type': 'optionValueString',
-        value: 'ios', // or 'android', depending on the platform
+        'value': 'ios', // or 'android', depending on the platform
       },
     };
 
@@ -137,7 +139,7 @@ const BaseApiExample = () => {
 
       const request = {
         '@type': 'getLocalizationTargetInfo',
-        only_locales: true,
+        'only_locales': true,
       };
       TdLib.td_json_client_send(request);
 
@@ -153,7 +155,7 @@ const BaseApiExample = () => {
 
           if (parsedResponse['@type'] === 'error') {
             throw new Error(
-              `Error fetching supported languages: ${parsedResponse.message}`,
+              `Error fetching supported languages: ${parsedResponse.message}`
             );
           }
         } else {
