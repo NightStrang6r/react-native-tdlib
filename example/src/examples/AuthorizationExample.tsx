@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import TdLib from 'react-native-tdlib';
 import Config from 'react-native-config';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import type { TdLibParameters } from '../../../src/NativeTdlib';
 
 const parameters = {
@@ -90,12 +91,42 @@ const AuthorizationExample = () => {
 
   const sendMessage = useCallback(async () => {
     try {
-      const result = await TdLib.sendMessage(chatId, message);
+      const gallery = await CameraRoll.getPhotos({
+        first: 1,
+      });
+      
+      let imageUri = null;
+      if (gallery && gallery.edges && gallery.edges.length > 0) {
+        const edge = gallery.edges[0];
+        if (edge && edge.node && edge.node.image) {
+          imageUri = edge.node.image.uri;
+        }
+      }
+
+      console.log('Image URI:', imageUri);
+
+      const result = await TdLib.sendMessage(chatId, message, imageUri);
       console.log('SendMessage:', result);
     } catch (error) {
       console.error('Error sending message:', error);
     }
   }, [chatId, message]);
+
+  /*useEffect(() => {
+    (async () => {
+      while (true) {
+        const result = await TdLib.td_json_client_receive();
+        const parsedResult = JSON.parse(result);
+        if (parsedResult.code != 400) {
+          console.log('Received:', parsedResult);
+        }
+
+        if (parsedResult['@type'] === 'updateNewMessage') {
+          console.log('New message received:', parsedResult);
+        }
+      }
+    })();
+  }, []);*/
 
   return (
     <ScrollView style={styles.container}>
@@ -199,6 +230,7 @@ const AuthorizationExample = () => {
           ]}
         />
         <Button title={'Send Message'} onPress={sendMessage} />
+        <View style={styles.divider} />
       </View>
     </ScrollView>
   );

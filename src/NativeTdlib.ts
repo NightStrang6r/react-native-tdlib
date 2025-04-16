@@ -31,7 +31,7 @@ export interface Spec extends TurboModule {
   verifyPassword(password: string): Promise<string>;
   getAuthorizationState(): Promise<any>;
   getProfile(): Promise<any>;
-  sendMessage(chatId: string, message: string): Promise<any>;
+  sendMessage(chatId: string, message: string, file: string | null): Promise<any>;
   logout(): Promise<any>;
   destroy(): Promise<any>;
 }

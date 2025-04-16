@@ -88,8 +88,8 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
         handleGetProfile(promise)
     }
 
-    override fun sendMessage(chatId: String, message: String, promise: Promise) {
-        handleSendMessage(chatId, message, promise)
+    override fun sendMessage(chatId: String, message: String, file: String?, promise: Promise) {
+        handleSendMessage(reactApplicationContext, chatId, message, file, promise)
     }
 
     override fun logout(promise: Promise) {
