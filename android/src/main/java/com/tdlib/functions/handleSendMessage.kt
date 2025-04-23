@@ -10,11 +10,11 @@ import org.drinkless.tdlib.TdApi
 import java.io.File
 import java.io.FileOutputStream
 
-fun TdlibModule.handleSendMessage(context: ReactApplicationContext, chatId: String, message: String, file: String?, promise: Promise) {
+fun TdlibModule.handleSendMessage(context: ReactApplicationContext, chatId: Double, message: String, file: String?, promise: Promise) {
     var copiedFile: File? = null
 
     try {
-        val chatIdLong = chatId.toLongOrNull()
+        val chatIdLong = chatId.toLong()
         if (chatIdLong == null) {
             promise.reject("SEND_MESSAGE_ERROR", "Invalid chat ID")
             return

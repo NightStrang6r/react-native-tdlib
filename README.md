@@ -64,7 +64,7 @@ await TdLib.startTdLib({
 
 // Login with phone number
 await TdLib.login({
-  countrycode: '+1',
+  countryCode: '+1',
   phoneNumber: '1234567890'
 });
 

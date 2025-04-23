@@ -11,15 +11,16 @@ import {
   Text,
   TextInput,
   View,
+  ToastAndroid
 } from 'react-native';
-import TdLib from 'react-native-tdlib';
+import TdLib, { subscribeToTdlibEvents, unsubscribeFromTdlibEvents } from 'react-native-tdlib';
 import Config from 'react-native-config';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import type { TdLibParameters } from '../../../src/NativeTdlib';
 
 const parameters = {
-  api_id: Number(Config.APP_ID), // Your API ID
-  api_hash: Config.APP_HASH, // Your API Hash
+  api_id: Number(Config.APP_ID),
+  api_hash: Config.APP_HASH,
 } as TdLibParameters;
 
 const AuthorizationExample = () => {
@@ -30,6 +31,21 @@ const AuthorizationExample = () => {
   const [profile, setProfile] = React.useState<any>(null);
   const [chatId, setChatId] = React.useState('');
   const [message, setMessage] = React.useState('');
+  const [channelName, setChannelName] = React.useState('');
+  const [channelDescription, setChannelDescription] = React.useState('');
+
+  useEffect(() => {
+    const subscription = subscribeToTdlibEvents(
+      ['tdlibGlobalUpdate'],
+      (payload) => {
+        console.log(`${payload['@type']}:`, payload);
+      }
+    );
+
+    return () => {
+      subscription();
+    };
+  }, []);
 
   useEffect(() => {
     // Initializes TDLib with the provided parameters and checks the authorization state
@@ -45,12 +61,25 @@ const AuthorizationExample = () => {
     });
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        console.log('Fetching chats...');
+        const result = await TdLib.getChats(999);
+        const parsedResult = JSON.parse(result);
+        console.log(parsedResult);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+      }
+    })();
+  }, []);
+
   // Sends a verification code to the provided phone number
   const sendCode = useCallback(async () => {
     try {
       console.log('Sending code...');
       const result = await TdLib.login({
-        countrycode: countryCode,
+        countryCode: countryCode,
         phoneNumber: phone,
       });
       console.log('SendCode:', result);
@@ -77,11 +106,13 @@ const AuthorizationExample = () => {
   const getProfile = useCallback(async () => {
     console.log('Fetching profile...');
     const result = await TdLib.getProfile();
-    console.log('User Profile:', result);
     const profile = Platform.select({
       ios: result,
       android: JSON.parse(result),
     });
+    const json = JSON.parse(result);
+    console.log('User Profile:', json);
+    ToastAndroid.show(`Logged in as ${json.usernames.editableUsername}`, ToastAndroid.SHORT);
     setProfile(profile);
   }, []);
 
@@ -105,7 +136,7 @@ const AuthorizationExample = () => {
 
       console.log('Image URI:', imageUri);
 
-      const result = await TdLib.sendMessage(chatId, message, imageUri);
+      const result = await TdLib.sendMessage(Number(chatId), message, imageUri);
       console.log('SendMessage:', result);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -128,10 +159,26 @@ const AuthorizationExample = () => {
     })();
   }, []);*/
 
+  const createChannel = useCallback(async () => {
+    const result = await TdLib.createNewSupergroupChat(
+      channelName,
+      false,
+      true,
+      channelDescription,
+      null,
+      null,
+      null
+    );
+    console.log('CreateChannel:', result);
+  }, [
+    channelName,
+    channelDescription,
+  ]);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>Auth</Text>
+        <Text style={styles.title}>TDLib Playground</Text>
         <Text>1. Login</Text>
         <TextInput
           value={countryCode}
@@ -230,6 +277,33 @@ const AuthorizationExample = () => {
           ]}
         />
         <Button title={'Send Message'} onPress={sendMessage} />
+        <View style={styles.divider} />
+        <Text>Create Channel</Text>
+        <TextInput
+          value={channelName}
+          onChangeText={setChannelName}
+          placeholder={'Channel Name'}
+          placeholderTextColor={'gray'}
+          style={[
+            styles.input,
+            {
+              marginVertical: 14,
+            },
+          ]}
+        />
+        <TextInput
+          value={channelDescription}
+          onChangeText={setChannelDescription}
+          placeholder={'Channel Description'}
+          placeholderTextColor={'gray'}
+          style={[
+            styles.input,
+            {
+              marginBottom: 14,
+            },
+          ]}
+        />
+        <Button title={'Create Channel'} onPress={createChannel} />
         <View style={styles.divider} />
       </View>
     </ScrollView>

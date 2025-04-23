@@ -11,13 +11,28 @@ export interface TdLibParameters {
 }
 
 export interface UserDetails {
-  countrycode: string; // Country code, e.g., "+1"
-  phoneNumber: string; // Phone number, e.g., "1234567890"
+  countryCode: string;
+  phoneNumber: string;
 }
 
 export interface SendRequest {}
 
 export interface ExecuteRequest {}
+
+export interface Location {
+  latitude: number;
+  longitude: number;
+  horizontalAccuracy: number;
+}
+
+export interface ChatLocation {
+  location: Location;
+  address: string;
+}
+
+export interface ChatList {
+
+}
 
 export interface Spec extends TurboModule {
   td_json_client_create(): Promise<string>;
@@ -26,12 +41,17 @@ export interface Spec extends TurboModule {
   td_json_client_receive(): Promise<string>;
 
   startTdLib(parameters: TdLibParameters): Promise<string>;
+  subscribeToEvents(eventTypes: string[]): void;
+  unsubscribeFromEvents(eventTypes: string[] | null): void;
   login(userDetails: UserDetails): Promise<void>;
   verifyPhoneNumber(otp: string): Promise<void>;
   verifyPassword(password: string): Promise<string>;
   getAuthorizationState(): Promise<any>;
   getProfile(): Promise<any>;
-  sendMessage(chatId: string, message: string, file: string | null): Promise<any>;
+  sendMessage(chatId: number, message: string, file: string | null): Promise<any>;
+  createNewSupergroupChat(title: string, isForum: boolean | null, isChannel: boolean | null, description: string | null, location: Location | null, messageAutoDeleteTime: number | null, forImport: boolean | null): Promise<any>;
+  getChats(limit: number): Promise<any>;
+  getChatHistory(chatId: number, fromMessageId: number, offset: number, limit: number, onlyLocal: boolean): Promise<any>;
   logout(): Promise<any>;
   destroy(): Promise<any>;
 }

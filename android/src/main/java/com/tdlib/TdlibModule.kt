@@ -5,6 +5,10 @@ import com.facebook.react.module.annotations.ReactModule
 
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.modules.core.DeviceEventManagerModule
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.ReadableArray
 
 import org.drinkless.tdlib.Client
 import org.drinkless.tdlib.TdApi
@@ -22,6 +26,7 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
     internal var TAG = "TdLibModule"
     internal var client: Client? = null
     internal var gson = Gson()
+    internal val subscribedEventTypes = mutableSetOf<String>()
 
     companion object {
         const val NAME = "Tdlib"
@@ -47,6 +52,47 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
         handle_td_json_client_receive(promise)
     }
 
+    override fun subscribeToEvents(types: ReadableArray) {
+        if (types == null) {
+            return
+        }
+
+        for (i in 0 until types.size()) {
+            val type = types.getString(i)
+            if (type != null) subscribedEventTypes.add(type)
+        }
+    }
+
+    override fun unsubscribeFromEvents(types: ReadableArray?) {
+        if (types == null) {
+            subscribedEventTypes.clear()
+            return
+        }
+
+        for (i in 0 until types.size()) {
+            val type = types.getString(i)
+            if (type != null) subscribedEventTypes.remove(type)
+        }
+    }
+
+    private fun sendEvent(eventTag: String, eventName: String, payload: TdApi.Object) {
+        if (!subscribedEventTypes.contains("tdlibGlobalUpdate") && !subscribedEventTypes.contains(eventName)) {
+            return
+        }
+
+        val json = JSONObject(gson.toJson(payload))
+        try {
+            json.put("@type", eventName)
+        } catch (e: JSONException) {
+            Log.e(TAG, "Error adding @type to JSON object", e)
+        }
+        val jsonString = json.toString()
+
+        reactApplicationContext
+            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+            .emit(eventTag, jsonString)
+    }    
+
     // ==================== High-Level API ====================
     override fun startTdLib(parameters: ReadableMap, promise: Promise) {
         try {
@@ -56,7 +102,12 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
             }
 
             client = Client.create(
-                { obj -> Log.d(TAG, "Global Update: $obj") },
+                { obj ->
+                    //Log.d(TAG, "Global Update: $obj")
+                    var eventName = obj.javaClass.simpleName ?: "Unknown"
+                    eventName = eventName.replaceFirstChar { it.lowercase() }
+                    sendEvent("tdlibGlobalUpdate", eventName, obj)
+                },
                 null,
                 null
             )
@@ -88,8 +139,38 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
         handleGetProfile(promise)
     }
 
-    override fun sendMessage(chatId: String, message: String, file: String?, promise: Promise) {
+    override fun sendMessage(chatId: Double, message: String, file: String?, promise: Promise) {
         handleSendMessage(reactApplicationContext, chatId, message, file, promise)
+    }
+
+    override fun createNewSupergroupChat(
+        title: String,
+        isForum: Boolean?,
+        isChannel: Boolean?,
+        description: String?,
+        location: ReadableMap?,
+        messageAutoDeleteTime: Double?,
+        forImport: Boolean?,
+        promise: Promise
+    ) {
+        handleCreateNewSupergroupChat(
+            title,
+            isForum,
+            isChannel,
+            description,
+            location,
+            messageAutoDeleteTime,
+            forImport,
+            promise
+        )
+    }
+
+    override fun getChats(limit: Double, promise: Promise) {
+        handleGetChats(limit, promise)
+    }
+
+    override fun getChatHistory(chatId: Double, fromMessageId: Double, offset: Double, limit: Double, onlyLocal: Boolean, promise: Promise) {
+        handleGetChatHistory(chatId, fromMessageId, offset, limit, onlyLocal, promise)
     }
 
     override fun logout(promise: Promise) {

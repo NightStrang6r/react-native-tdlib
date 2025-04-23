@@ -9,7 +9,7 @@ import org.drinkless.tdlib.TdApi
 fun TdlibModule.handleLogin(userDetails: ReadableMap, promise: Promise) {
     try {
         val authPhoneNumber = TdApi.SetAuthenticationPhoneNumber().apply {
-            phoneNumber = userDetails.getString("countrycode") + userDetails.getString("phoneNumber")
+            phoneNumber = userDetails.getString("countryCode") + userDetails.getString("phoneNumber")
         }
 
         client?.send(authPhoneNumber) { obj ->
