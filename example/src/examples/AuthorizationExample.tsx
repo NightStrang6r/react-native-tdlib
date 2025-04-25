@@ -61,19 +61,6 @@ const AuthorizationExample = () => {
     });
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        console.log('Fetching chats...');
-        const result = await TdLib.getChats(999);
-        const parsedResult = JSON.parse(result);
-        console.log(parsedResult);
-      } catch (error) {
-        console.error('Error fetching chats:', error);
-      }
-    })();
-  }, []);
-
   // Sends a verification code to the provided phone number
   const sendCode = useCallback(async () => {
     try {
@@ -136,6 +123,8 @@ const AuthorizationExample = () => {
 
       console.log('Image URI:', imageUri);
 
+      console.log('Chat ID:', chatId);
+      console.log('Message:', message);
       const result = await TdLib.sendMessage(Number(chatId), message, imageUri);
       console.log('SendMessage:', result);
     } catch (error) {
@@ -174,6 +163,36 @@ const AuthorizationExample = () => {
     channelName,
     channelDescription,
   ]);
+
+  const getChats = useCallback(async () => {
+    try {
+      console.log('Fetching chats...');
+      const result = await TdLib.getChats(999);
+      const parsedResult = JSON.parse(result);
+      console.log(parsedResult);
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+    }
+  }, []);
+
+  const getChatHistory = useCallback(async () => {
+    try {
+      const getChat = await TdLib.getChat(Number(chatId));
+      const parsedChat = JSON.parse(getChat);
+      console.log('Chat:', parsedChat);
+      const result = await TdLib.getChatHistory(
+        Number(chatId),
+        null,
+        null,
+        100,
+        null
+      );
+      const parsedResult = JSON.parse(result);
+      console.log('Chat History:', parsedResult);
+    } catch (error) {
+      console.error('Error fetching chat history:', error);
+    }
+  }, [chatId]);
 
   return (
     <ScrollView style={styles.container}>
@@ -277,6 +296,8 @@ const AuthorizationExample = () => {
           ]}
         />
         <Button title={'Send Message'} onPress={sendMessage} />
+        <Button title={'Get Chat History'} onPress={getChatHistory} />
+        <Button title={'Get Chats'} onPress={getChats} />
         <View style={styles.divider} />
         <Text>Create Channel</Text>
         <TextInput

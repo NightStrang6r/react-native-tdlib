@@ -51,7 +51,8 @@ export interface Spec extends TurboModule {
   sendMessage(chatId: number, message: string, file: string | null): Promise<any>;
   createNewSupergroupChat(title: string, isForum: boolean | null, isChannel: boolean | null, description: string | null, location: Location | null, messageAutoDeleteTime: number | null, forImport: boolean | null): Promise<any>;
   getChats(limit: number): Promise<any>;
-  getChatHistory(chatId: number, fromMessageId: number, offset: number, limit: number, onlyLocal: boolean): Promise<any>;
+  getChat(chatId: number): Promise<any>;
+  getChatHistory(chatId: number, fromMessageId: number | null, offset: number | null, limit: number | null, onlyLocal: boolean | null): Promise<any>;
   logout(): Promise<any>;
   destroy(): Promise<any>;
 }

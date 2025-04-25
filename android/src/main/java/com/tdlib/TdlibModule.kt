@@ -18,6 +18,7 @@ import java.util.HashMap
 import org.json.JSONObject
 import org.json.JSONException
 import android.util.Log
+import java.lang.reflect.Constructor
 
 import com.tdlib.functions.*
 
@@ -169,7 +170,11 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
         handleGetChats(limit, promise)
     }
 
-    override fun getChatHistory(chatId: Double, fromMessageId: Double, offset: Double, limit: Double, onlyLocal: Boolean, promise: Promise) {
+    override fun getChat(chatId: Double, promise: Promise) {
+        handleGetChat(chatId, promise)
+    }
+
+    override fun getChatHistory(chatId: Double, fromMessageId: Double?, offset: Double?, limit: Double?, onlyLocal: Boolean?, promise: Promise) {
         handleGetChatHistory(chatId, fromMessageId, offset, limit, onlyLocal, promise)
     }
 
@@ -187,8 +192,58 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
     }
 
     // ==================== Helpers ====================
-    /*private fun convertMapToFunction(requestMap: Map<String, Any>): TdApi.Function {
-        // TODO: Implement conversion logic based on TdApi request types
-        throw UnsupportedOperationException("Conversion not implemented")
+    /*@Suppress("UNCHECKED_CAST")
+    private fun convertMapToFunction(requestMap: Map<String, Any>): TdApi.Function {
+        val type = requestMap["@type"] as? String
+            ?: throw IllegalArgumentException("Missing @type in request")
+
+        val className = "org.drinkless.tdlib.TdApi\$" + type.replaceFirstChar { it.uppercaseChar() }
+
+        val clazz = try {
+            Class.forName(className)
+        } catch (e: ClassNotFoundException) {
+            throw UnsupportedOperationException("Unsupported @type: $type (class $className not found)")
+        }
+
+        if (!TdApi.Function::class.java.isAssignableFrom(clazz)) {
+            throw UnsupportedOperationException("Class $className is not a TdApi.Function")
+        }
+
+        // Попробуем найти конструктор с нужными параметрами и установить поля вручную
+        val instance = clazz.getDeclaredConstructor().newInstance()
+
+        requestMap.forEach { (key, value) ->
+            if (key == "@type") return@forEach
+
+            try {
+                val field = clazz.getField(key)
+                val convertedValue = convertValue(value, field.type)
+                field.set(instance, convertedValue)
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Failed to set field '$key' on $className: ${e.message}", e)
+            }
+        }
+
+        return instance as TdApi.Function
+    }
+
+    private fun convertValue(value: Any, targetType: Class<*>): Any? {
+        return when {
+            targetType.isAssignableFrom(value::class.java) -> value
+            targetType == String::class.java -> value.toString()
+            targetType == Boolean::class.java || targetType == java.lang.Boolean::class.java -> value as Boolean
+            targetType == Int::class.java || targetType == java.lang.Integer::class.java -> (value as Number).toInt()
+            targetType == Long::class.java || targetType == java.lang.Long::class.java -> (value as Number).toLong()
+            targetType == Double::class.java || targetType == java.lang.Double::class.java -> (value as Number).toDouble()
+            targetType.isArray && value is List<*> -> {
+                val componentType = targetType.componentType
+                java.lang.reflect.Array.newInstance(componentType, value.size).also { array ->
+                    value.forEachIndexed { i, v ->
+                        java.lang.reflect.Array.set(array, i, convertValue(v!!, componentType))
+                    }
+                }
+            }
+            else -> throw IllegalArgumentException("Unsupported field type: ${targetType.name} for value $value")
+        }
     }*/
 }

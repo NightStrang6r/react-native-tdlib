@@ -70,7 +70,7 @@ fun TdlibModule.handleSendMessage(context: ReactApplicationContext, chatId: Doub
         client?.send(sendMessage) { obj ->
             when (obj) {
                 is TdApi.Message -> safePromise.resolve(gson.toJson(obj))
-                is TdApi.Error -> safePromise.reject("SEND_MESSAGE_ERROR", obj.message)
+                is TdApi.Error -> safePromise.reject("SEND_MESSAGE_ERROR", gson.toJson(obj))
             }
         }
     } catch (e: Exception) {

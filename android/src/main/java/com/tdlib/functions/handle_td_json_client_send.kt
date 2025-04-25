@@ -1,6 +1,6 @@
-package com.tdlib.functions
+/*package com.tdlib.functions
 
-/*import com.tdlib.TdlibModule
+import com.tdlib.TdlibModule
 
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReadableMap

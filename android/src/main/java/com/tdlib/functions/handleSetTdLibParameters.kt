@@ -13,15 +13,17 @@ fun TdlibModule.handleSetTdLibParameters(reactApplicationContext: ReactApplicati
     try {
         val tdlibParameters = TdApi.SetTdlibParameters().apply {
             databaseDirectory = "${reactApplicationContext.filesDir.absolutePath}/tdlib"
+            filesDirectory = "${reactApplicationContext.filesDir.absolutePath}/tdlib"
+            useChatInfoDatabase = true
             useMessageDatabase = true
-            useSecretChats = true
+            useFileDatabase = true
+            useSecretChats = false
             apiId = parameters.getInt("api_id")
             apiHash = parameters.getString("api_hash")
             systemLanguageCode = parameters.getString("system_language_code") ?: "en"
             deviceModel = parameters.getString("device_model") ?: "React Native"
             systemVersion = parameters.getString("system_version") ?: "1.0"
             applicationVersion = parameters.getString("application_version") ?: "1.0"
-            useFileDatabase = true
         }
 
         client?.send(tdlibParameters) { obj ->
