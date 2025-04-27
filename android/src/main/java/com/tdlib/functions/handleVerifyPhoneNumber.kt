@@ -13,8 +13,8 @@ fun TdlibModule.handleVerifyPhoneNumber(code: String, promise: Promise) {
 
         client?.send(checkCode) { obj ->
             when (obj) {
-                is TdApi.Ok -> promise.resolve("Verification successful")
-                is TdApi.Error -> promise.reject("VERIFY_PHONE_NUMBER_ERROR", obj.message)
+                is TdApi.Ok -> promise.resolve(gson.toJson(obj))
+                is TdApi.Error -> promise.reject("VERIFY_PHONE_NUMBER_ERROR", gson.toJson(obj))
             }
         }
     } catch (e: Exception) {

@@ -9,8 +9,8 @@ fun TdlibModule.handleDestroy(promise: Promise) {
     try {
         client?.send(TdApi.Destroy()) { obj ->
             when (obj) {
-                is TdApi.Ok -> promise.resolve("Destroy successful")
-                is TdApi.Error -> promise.reject("DESTROY_ERROR", obj.message)
+                is TdApi.Ok -> promise.resolve(gson.toJson(obj))
+                is TdApi.Error -> promise.reject("DESTROY_ERROR", gson.toJson(obj))
             }
         }
 

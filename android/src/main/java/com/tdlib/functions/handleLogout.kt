@@ -9,8 +9,8 @@ fun TdlibModule.handleLogout(promise: Promise) {
     try {
         client?.send(TdApi.LogOut()) { obj ->
             when (obj) {
-                is TdApi.Ok -> promise.resolve("Logout successful")
-                is TdApi.Error -> promise.reject("LOGOUT_ERROR", obj.message)
+                is TdApi.Ok -> promise.resolve(gson.toJson(obj))
+                is TdApi.Error -> promise.reject("LOGOUT_ERROR", gson.toJson(obj))
             }
         }
 

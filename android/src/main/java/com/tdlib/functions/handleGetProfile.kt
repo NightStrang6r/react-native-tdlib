@@ -10,7 +10,7 @@ fun TdlibModule.handleGetProfile(promise: Promise) {
     try {
         client?.send(TdApi.GetMe()) { obj ->
             when (obj) {
-                is TdApi.User -> promise.resolve(Gson().toJson(obj))
+                is TdApi.User -> promise.resolve(gson.toJson(obj))
                 is TdApi.Error -> promise.reject("GET_PROFILE_ERROR", obj.message)
             }
         }

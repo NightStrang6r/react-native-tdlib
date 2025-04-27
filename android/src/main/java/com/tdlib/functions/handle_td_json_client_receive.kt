@@ -7,26 +7,20 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 import org.drinkless.tdlib.TdApi
+import org.drinkless.tdlib.JsonClient
 import java.util.concurrent.TimeUnit
 
-fun TdlibModule.handle_td_json_client_receive(promise: Promise) {
+fun TdlibModule.handle_td_json_client_receive(timeout: Double?, promise: Promise) {
     try {
-        if (client == null) {
-            promise.reject("CLIENT_NOT_INITIALIZED", "TDLib client is not initialized")
+        if (jsonClientId == null) {
+            promise.reject("CLIENT_NOT_INITIALIZED", "TDLib jsonClient is not initialized")
             return
         }
 
-        val latch = CountDownLatch(1)
-        val responseRef = AtomicReference<TdApi.Object?>()
+        val response = JsonClient.receive(timeout ?: 10.0)
 
-        client?.send(null) { obj ->
-            responseRef.set(obj)
-            latch.countDown()
-        }
-
-        val awaitSuccess = latch.await(10, TimeUnit.SECONDS)
-        if (awaitSuccess && responseRef.get() != null) {
-            promise.resolve(gson.toJson(responseRef.get()))
+        if (response != null) {
+            promise.resolve(gson.toJson(response))
         } else {
             promise.reject("RECEIVE_ERROR", "No response from TDLib")
         }

@@ -28,8 +28,8 @@ fun TdlibModule.handleSetTdLibParameters(reactApplicationContext: ReactApplicati
 
         client?.send(tdlibParameters) { obj ->
             when (obj) {
-                is TdApi.Ok -> promise.resolve("TDLib parameters set successfully")
-                is TdApi.Error -> promise.reject("TDLIB_PARAMS_ERROR", obj.message)
+                is TdApi.Ok -> promise.resolve(gson.toJson(obj))
+                is TdApi.Error -> promise.reject("TDLIB_PARAMS_ERROR", gson.toJson(obj))
             }
         }
     } catch (e: Exception) {

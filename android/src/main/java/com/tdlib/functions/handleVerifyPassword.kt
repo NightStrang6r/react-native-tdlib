@@ -13,8 +13,8 @@ fun TdlibModule.handleVerifyPassword(password: String, promise: Promise) {
 
         client?.send(checkPassword) { obj ->
             when (obj) {
-                is TdApi.Ok -> promise.resolve("Password verification successful")
-                is TdApi.Error -> promise.reject("PASSWORD_ERROR", obj.message)
+                is TdApi.Ok -> promise.resolve(gson.toJson(obj))
+                is TdApi.Error -> promise.reject("PASSWORD_ERROR", gson.toJson(obj))
             }
         }
     } catch (e: Exception) {

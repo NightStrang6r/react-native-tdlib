@@ -26,7 +26,7 @@ fun TdlibModule.handleGetAuthorizationState(promise: Promise) {
                         promise.reject("JSON_CONVERT_ERROR", "Error converting object to JSON: ${e.message}")
                     }
                 }
-                is TdApi.Error -> promise.reject("AUTH_STATE_ERROR", obj.message)
+                is TdApi.Error -> promise.reject("AUTH_STATE_ERROR", gson.toJson(obj))
                 else -> promise.reject("AUTH_STATE_UNEXPECTED_RESPONSE", "Unexpected response from TDLib.")
             }
         }

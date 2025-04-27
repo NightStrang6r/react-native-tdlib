@@ -61,9 +61,9 @@ const BaseApiExample = () => {
         parameters,
       };
 
-      TdLib.td_json_client_send(tdLibParameters);
+      TdLib.td_json_client_send(JSON.stringify(tdLibParameters));
     } catch (error) {
-      console.error('Error setting TDLib parameters:', error.message);
+      console.error('Error setting TDLib parameters:', error);
       throw error;
     }
   }, [client]);
@@ -77,7 +77,7 @@ const BaseApiExample = () => {
       await setTdLibParameters();
       console.log('TDLib initialized successfully');
     } catch (error) {
-      console.error('Error initializing TDLib:', error.message);
+      console.error('Error initializing TDLib:', error);
     }
   };
 
@@ -86,9 +86,9 @@ const BaseApiExample = () => {
    */
   const closeTdLibClient = useCallback(async () => {
     if (client) {
-      TdLib.td_json_client_send({
+      TdLib.td_json_client_send(JSON.stringify({
         '@type': 'close',
-      });
+      }));
       client = null;
       console.log('TDLib client closed');
     }
@@ -111,7 +111,7 @@ const BaseApiExample = () => {
       'phone_number': '+12345678', // Your Telegram phone number
     };
 
-    TdLib.td_json_client_send(phoneRequest);
+    TdLib.td_json_client_send(JSON.stringify(phoneRequest));
   }, []);
 
   /**
@@ -127,7 +127,7 @@ const BaseApiExample = () => {
       },
     };
 
-    TdLib.td_json_client_send(request);
+    TdLib.td_json_client_send(JSON.stringify(request));
   };
 
   /**
@@ -141,10 +141,10 @@ const BaseApiExample = () => {
         '@type': 'getLocalizationTargetInfo',
         'only_locales': true,
       };
-      TdLib.td_json_client_send(request);
+      TdLib.td_json_client_send(JSON.stringify(request));
 
       while (true) {
-        const response = await TdLib.td_json_client_receive();
+        const response = await TdLib.td_json_client_receive(10);
         if (response) {
           const parsedResponse = JSON.parse(response);
 

@@ -11,6 +11,7 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableArray
 
 import org.drinkless.tdlib.Client
+import org.drinkless.tdlib.JsonClient
 import org.drinkless.tdlib.TdApi
 import com.google.gson.Gson
 import java.util.Map
@@ -26,6 +27,7 @@ import com.tdlib.functions.*
 class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(reactContext) {
     internal var TAG = "TdLibModule"
     internal var client: Client? = null
+    internal var jsonClientId: Int? = null
     internal var gson = Gson()
     internal val subscribedEventTypes = mutableSetOf<String>()
 
@@ -41,16 +43,16 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
         handle_td_json_client_create(promise)
     }
 
-    /*override fun td_json_client_execute(request: ReadableMap, promise: Promise) {
+    override fun td_json_client_execute(request: String, promise: Promise) {
         td_json_client_execute(request, promise)
     }
 
-    override fun td_json_client_send(request: ReadableMap, promise: Promise) {
+    override fun td_json_client_send(request: String, promise: Promise) {
         td_json_client_send(request, promise)
-    }*/
+    }
 
-    override fun td_json_client_receive(promise: Promise) {
-        handle_td_json_client_receive(promise)
+    override fun td_json_client_receive(timeout: Double?, promise: Promise) {
+        handle_td_json_client_receive(timeout, promise)
     }
 
     override fun subscribeToEvents(types: ReadableArray) {
@@ -124,8 +126,8 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
         handleGetAuthorizationState(promise)
     }
 
-    override fun login(userDetails: ReadableMap, promise: Promise) {
-        handleLogin(userDetails, promise)
+    override fun login(phoneNumber: String, promise: Promise) {
+        handleLogin(phoneNumber, promise)
     }
 
     override fun verifyPhoneNumber(code: String, promise: Promise) {
@@ -142,6 +144,10 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
 
     override fun sendMessage(chatId: Double, message: String, file: String?, promise: Promise) {
         handleSendMessage(reactApplicationContext, chatId, message, file, promise)
+    }
+
+    override fun downloadFile(fileId: Double, priority: Double?, offset: Double?, limit: Double?, synchronous: Boolean?, promise: Promise) {
+        handleDownloadFile(fileId, priority, offset, limit, synchronous, promise)
     }
 
     override fun createNewSupergroupChat(
@@ -190,60 +196,4 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
     private fun setTdLibParameters(reactApplicationContext: ReactApplicationContext, parameters: ReadableMap, promise: Promise) {
         handleSetTdLibParameters(reactApplicationContext, parameters, promise)
     }
-
-    // ==================== Helpers ====================
-    /*@Suppress("UNCHECKED_CAST")
-    private fun convertMapToFunction(requestMap: Map<String, Any>): TdApi.Function {
-        val type = requestMap["@type"] as? String
-            ?: throw IllegalArgumentException("Missing @type in request")
-
-        val className = "org.drinkless.tdlib.TdApi\$" + type.replaceFirstChar { it.uppercaseChar() }
-
-        val clazz = try {
-            Class.forName(className)
-        } catch (e: ClassNotFoundException) {
-            throw UnsupportedOperationException("Unsupported @type: $type (class $className not found)")
-        }
-
-        if (!TdApi.Function::class.java.isAssignableFrom(clazz)) {
-            throw UnsupportedOperationException("Class $className is not a TdApi.Function")
-        }
-
-        // Попробуем найти конструктор с нужными параметрами и установить поля вручную
-        val instance = clazz.getDeclaredConstructor().newInstance()
-
-        requestMap.forEach { (key, value) ->
-            if (key == "@type") return@forEach
-
-            try {
-                val field = clazz.getField(key)
-                val convertedValue = convertValue(value, field.type)
-                field.set(instance, convertedValue)
-            } catch (e: Exception) {
-                throw IllegalArgumentException("Failed to set field '$key' on $className: ${e.message}", e)
-            }
-        }
-
-        return instance as TdApi.Function
-    }
-
-    private fun convertValue(value: Any, targetType: Class<*>): Any? {
-        return when {
-            targetType.isAssignableFrom(value::class.java) -> value
-            targetType == String::class.java -> value.toString()
-            targetType == Boolean::class.java || targetType == java.lang.Boolean::class.java -> value as Boolean
-            targetType == Int::class.java || targetType == java.lang.Integer::class.java -> (value as Number).toInt()
-            targetType == Long::class.java || targetType == java.lang.Long::class.java -> (value as Number).toLong()
-            targetType == Double::class.java || targetType == java.lang.Double::class.java -> (value as Number).toDouble()
-            targetType.isArray && value is List<*> -> {
-                val componentType = targetType.componentType
-                java.lang.reflect.Array.newInstance(componentType, value.size).also { array ->
-                    value.forEachIndexed { i, v ->
-                        java.lang.reflect.Array.set(array, i, convertValue(v!!, componentType))
-                    }
-                }
-            }
-            else -> throw IllegalArgumentException("Unsupported field type: ${targetType.name} for value $value")
-        }
-    }*/
 }
