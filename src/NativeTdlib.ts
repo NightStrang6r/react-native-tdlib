@@ -10,10 +10,6 @@ export interface TdLibParameters {
   application_version?: string;
 }
 
-export interface SendRequest {}
-
-export interface ExecuteRequest {}
-
 export interface Location {
   latitude: number;
   longitude: number;
@@ -47,7 +43,7 @@ export interface Spec extends TurboModule {
   subscribeToEvents(eventTypes: string[]): void;
   unsubscribeFromEvents(eventTypes: string[] | null): void;
   login(phoneNumber: string): Promise<string>;
-  verifyPhoneNumber(otp: string): Promise<void>;
+  verifyCode(otp: string): Promise<void>;
   verifyPassword(password: string): Promise<string>;
   getAuthorizationState(): Promise<any>;
   getProfile(): Promise<any>;
@@ -56,6 +52,7 @@ export interface Spec extends TurboModule {
   getChat(chatId: number): Promise<any>;
   getChatHistory(chatId: number, fromMessageId: number | null, offset: number | null, limit: number | null, onlyLocal: boolean | null): Promise<any>;
   sendMessage(chatId: number, message: string, file: string | null): Promise<any>;
+  deleteMessages(chatId: number, messageIds: number[], revoke: boolean | null): Promise<any>;
   downloadFile(fileId: number, priority: number | null, offset: number | null, limit: number | null, synchronous: boolean | null): Promise<any>;
   logout(): Promise<any>;
   destroy(): Promise<any>;

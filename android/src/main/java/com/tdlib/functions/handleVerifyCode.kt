@@ -5,7 +5,7 @@ import com.tdlib.TdlibModule
 import com.facebook.react.bridge.Promise
 import org.drinkless.tdlib.TdApi
 
-fun TdlibModule.handleVerifyPhoneNumber(code: String, promise: Promise) {
+fun TdlibModule.handleVerifyCode(code: String, promise: Promise) {
     try {
         val checkCode = TdApi.CheckAuthenticationCode().apply {
             this.code = code

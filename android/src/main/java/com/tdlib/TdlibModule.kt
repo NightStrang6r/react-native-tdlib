@@ -130,8 +130,8 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
         handleLogin(phoneNumber, promise)
     }
 
-    override fun verifyPhoneNumber(code: String, promise: Promise) {
-        handleVerifyPhoneNumber(code, promise)
+    override fun verifyCode(code: String, promise: Promise) {
+        handleVerifyCode(code, promise)
     }
 
     override fun verifyPassword(password: String, promise: Promise) {
@@ -144,6 +144,10 @@ class TdlibModule(reactContext: ReactApplicationContext) : NativeTdlibSpec(react
 
     override fun sendMessage(chatId: Double, message: String, file: String?, promise: Promise) {
         handleSendMessage(reactApplicationContext, chatId, message, file, promise)
+    }
+
+    override fun deleteMessages(chatId: Double, messageIds: ReadableArray, revoke: Boolean?, promise: Promise) {
+        handleDeleteMessages(chatId, messageIds, revoke, promise)
     }
 
     override fun downloadFile(fileId: Double, priority: Double?, offset: Double?, limit: Double?, synchronous: Boolean?, promise: Promise) {
